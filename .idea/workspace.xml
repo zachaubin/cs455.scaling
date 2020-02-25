@@ -1,7 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="44a7fdd6-525b-46a6-a052-f689853ba62c" name="Default Changelist" comment="" />
+    <list default="true" id="44a7fdd6-525b-46a6-a052-f689853ba62c" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/java/cs455/scaling/bytes/RandomPacket.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/cs455/scaling/client/Hashes.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/cs455/scaling/client/Printer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/cs455/scaling/server/Printer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/cs455/scaling/server/ThreadWorkQueue.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/cs455/scaling/client/Client.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/cs455/scaling/client/Client.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/cs455/scaling/server/ThreadPool.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/cs455/scaling/server/ThreadPool.java" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -29,7 +38,9 @@
     <option name="version" value="1" />
   </component>
   <component name="ProjectId" id="1YJEbaUghSPy7ST7q4x8wYBwZcW" />
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showExcludedFiles" value="true" />
@@ -51,7 +62,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1582652368751</updated>
-      <workItem from="1582652371828" duration="2402000" />
+      <workItem from="1582652371828" duration="3919000" />
     </task>
     <servers />
   </component>
