@@ -1,8 +1,7 @@
-package server;
+package cs455.scaling.server;
 
 
 import java.io.IOException;
-import java.net.Inet4Address;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
@@ -19,12 +18,12 @@ public class Server {
     }
 
     public static void register(Selector selector, ServerSocketChannel serverSocket) throws IOException{
-        //grab incoming socket from server
+        //grab incoming socket from cs455.scaling.server
         SocketChannel client = serverSocket.accept();
         //configure it to be a new channel
         client.configureBlocking(false);
         client.register(selector, SelectionKey.OP_READ);
-        System.out.println("\t\tNew client registered.");
+        System.out.println("\t\tNew cs455.scaling.client registered.");
 
     }
 

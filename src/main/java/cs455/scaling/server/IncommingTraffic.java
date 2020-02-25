@@ -1,4 +1,4 @@
-package server;
+package cs455.scaling.server;
 
 public class IncommingTraffic {
 }

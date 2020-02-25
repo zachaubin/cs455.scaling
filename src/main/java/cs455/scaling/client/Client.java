@@ -1,4 +1,4 @@
-package client;
+package cs455.scaling.client;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -13,12 +13,12 @@ public class Client {
         String hostname = "localhost";
         int port = 1090;
         try {
-            //connect to server
+            //connect to cs455.scaling.server
             client = SocketChannel.open(new InetSocketAddress(hostname,port));
             //create buffer
             buffer = ByteBuffer.allocate(256);
         } catch (IOException e){
-            System.err.println("error connecting to server, stacktrace:...");
+            System.err.println("error connecting to cs455.scaling.server, stacktrace:...");
             e.printStackTrace();
         }
 
@@ -32,7 +32,7 @@ public class Client {
             System.out.println("Server responded with: " + response);
             buffer.clear();
         } catch (IOException e){
-            System.err.println("error receiving from server, stacktrace:...");
+            System.err.println("error receiving from cs455.scaling.server, stacktrace:...");
             e.printStackTrace();
         }
     }
