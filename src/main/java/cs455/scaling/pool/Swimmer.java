@@ -1,21 +1,20 @@
 package cs455.scaling.pool;
 
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class Swimmer extends Thread {
 
-    ArrayBlockingQueue queue = null;
+    LinkedBlockingQueue queue = null;
     boolean swimming = false;
 
-    public Swimmer(ArrayBlockingQueue queue){
+    public Swimmer(LinkedBlockingQueue queue){
         this.queue = queue;
     }
 
-    public boolean isSwimming(){
+    public boolean swimming(){
         return swimming;
     }
-
-
 
     public void kill(){
         swimming = false;
@@ -26,6 +25,7 @@ public class Swimmer extends Thread {
         while(!swimming){
             try{
                 Runnable runnable = (Runnable) queue.take();
+                System.out.println("swimmer: took, queue size:" + queue.size());
                 runnable.run();
             } catch(Exception e){
                 System.err.println("pool:Swimmer:: error running a swimmer.");

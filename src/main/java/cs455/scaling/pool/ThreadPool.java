@@ -10,13 +10,15 @@ package cs455.scaling.pool;
 import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import static java.lang.System.exit;
+import static java.lang.Thread.sleep;
 
 public class ThreadPool implements Runnable {
 
     ArrayList<Swimmer> pool;
-    ArrayBlockingQueue queue = null;
+    LinkedBlockingQueue<Thread> queue = null;
 
     boolean poolOpen;
 
@@ -27,7 +29,7 @@ public class ThreadPool implements Runnable {
             Thread.currentThread().getStackTrace();
             exit(1);
         }
-        queue = new ArrayBlockingQueue(max);
+        queue = new LinkedBlockingQueue();
         pool = new ArrayList<>(max);
 
         for(int i = 0; i < init; i++){
@@ -36,8 +38,11 @@ public class ThreadPool implements Runnable {
         }
     }
 
-    public synchronized void execute(Runnable runnable) {
-        this.queue.offer(runnable);
+    public synchronized void execute(Thread thread) {
+//        if(!this.swimming()) {
+//            System.err.println("");
+//        }
+        this.queue.offer(thread);
     }
 
     public synchronized void kill(){
@@ -47,15 +52,25 @@ public class ThreadPool implements Runnable {
         }
     }
 
+
+
     /////////////////////////http://tutorials.jenkov.com/java-concurrency/thread-pools.html
 
     @Override
     public void run() {
         poolOpen = true;
-        for(Thread t : pool){
-            t.start();
-        }
         while(true){
+            Thread thread = null;
+            try {
+                thread = queue.take();
+                System.out.println("taking thread, queue.size():"+queue.size());
+            } catch (InterruptedException e) {
+                System.err.println("pool:ThreadPool:: error taking from queue ");
+                e.printStackTrace();
+            }
+            thread.run();
+
+
 
         }
     }
