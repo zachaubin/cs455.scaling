@@ -1,77 +1,57 @@
 package cs455.scaling.pool;
 
-
-/*
- This should allocate a given number of threads,
- maintain a queue of pending tasks, and
- assign tasks to be handled by the threads.
- */
-
-import java.util.ArrayList;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import static java.lang.System.exit;
-import static java.lang.Thread.sleep;
+public class ThreadPool {
+    private int maxThreads;
+    private LinkedBlockingQueue queue;
+    private Swimmer[] swimmers;
 
-public class ThreadPool implements Runnable {
-
-    ArrayList<Swimmer> pool;
-    LinkedBlockingQueue<Thread> queue = null;
-
-    boolean poolOpen;
-
-
-    public ThreadPool(int max, int init){
-        if( init > max ){
-            System.err.println("Pool:pool:: error cannot init [" + init + "] threads with a max of [" + max + "].");
-            Thread.currentThread().getStackTrace();
-            exit(1);
-        }
+    public ThreadPool(int maxThreads) {
+        this.maxThreads = maxThreads;
         queue = new LinkedBlockingQueue();
-        pool = new ArrayList<>(max);
+        swimmers = new Swimmer[maxThreads];
 
-        for(int i = 0; i < init; i++){
-            Swimmer s = new Swimmer(queue);
-            pool.add(s);
+        //in class we said starting .start() in a constructor was bad
+        // maybe we also said it's okay for a thread pool
+        // // I hope this is not a bad idea because right now it works
+        for (int i = 0; i < maxThreads; i++) {
+            swimmers[i] = new Swimmer();
+            swimmers[i].start();
         }
     }
 
-    public synchronized void execute(Thread thread) {
-//        if(!this.swimming()) {
-//            System.err.println("");
-//        }
-        this.queue.offer(thread);
-    }
-
-    public synchronized void kill(){
-        poolOpen = false;
-        for(Swimmer thread : pool){
-            thread.kill();
+    public void execute(Runnable task) {
+        synchronized (queue) {
+            queue.add(task);
+            queue.notify();
         }
     }
 
+    private class Swimmer extends Thread {
+        public void run() {
+            Runnable task;
 
-
-    /////////////////////////http://tutorials.jenkov.com/java-concurrency/thread-pools.html
-
-    @Override
-    public void run() {
-        poolOpen = true;
-        while(true){
-            Thread thread = null;
-            try {
-                thread = queue.take();
-                System.out.println("taking thread, queue.size():"+queue.size());
-            } catch (InterruptedException e) {
-                System.err.println("pool:ThreadPool:: error taking from queue ");
-                e.printStackTrace();
+            while (true) {
+                synchronized (queue) {
+                    while (queue.isEmpty()) {
+                        try {
+                            queue.wait();
+                        } catch (InterruptedException e) {
+                            System.out.println("::pool:ThreadPool:queue.wait():: ||empty queue error|| " + e.getMessage());
+                            Thread.currentThread().getStackTrace();
+                        }
+                    }
+                    task = (Runnable) queue.poll();
+                }
+                try {
+                    task.run();
+//                    sleep(1000);// to observe the chunks
+                } catch (RuntimeException e) {
+                    System.out.println("::pool:ThreadPool:task.run():: " + e.getMessage());
+                    Thread.currentThread().getStackTrace();
+                }
             }
-            thread.run();
-
-
-
         }
     }
 }

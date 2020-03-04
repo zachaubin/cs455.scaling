@@ -2,18 +2,17 @@ package cs455.scaling.pool;
 
 public class Test {
 
-    public static void main(String[] args){
-        ThreadPool pool = new ThreadPool(10,5);
-        for(int i = 0; i < 50; i++){
-            PrintBot p = new PrintBot(i);
-            Thread thread = new Thread(p);
-            pool.execute(thread);
+    public static void main(String[] args) {
+        int maxThreads;
+        if(!args[0].isEmpty()){
+            maxThreads = Integer.parseInt(args[0]);
+        } else {
+            maxThreads = 4;
         }
-        System.out.println("Test: queue.size():"+pool.queue.size());
-        pool.run();
+        ThreadPool pool = new ThreadPool(maxThreads);
+        for (int i = 0; i < 50; i++) {
+            PrintBot task = new PrintBot(i);
+            pool.execute(task);
+        }
     }
-
-
-
-
 }
