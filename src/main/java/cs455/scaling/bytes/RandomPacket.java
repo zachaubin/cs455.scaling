@@ -2,6 +2,7 @@ package cs455.scaling.bytes;
 
 // maybe make one, use a generator function within it to avoid overhead
 
+import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 
 public class RandomPacket {
@@ -20,8 +21,15 @@ public class RandomPacket {
         }
     }
 
-    public static void main(String[] args){
+    public static void main(String[] args) throws NoSuchAlgorithmException {
         RandomPacket r = new RandomPacket();
-        printMessage(r.generate());
+//        printMessage(r.generate());
+        byte[] msg = r.generate();
+        Hash h = new Hash();
+        for(int i = 0 ; i < 100; i++) {
+            msg = r.generate();
+            String s = h.SHA1FromBytes(msg);
+            System.out.println(s);
+        }
     }
 }
