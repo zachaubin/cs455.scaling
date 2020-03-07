@@ -1,10 +1,13 @@
 package cs455.scaling.client;
 
+import cs455.scaling.bytes.RandomPacket;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
 /*
@@ -21,7 +24,7 @@ public class Client {
     private static SocketChannel client;
     private static ByteBuffer buffer;
     private byte[] msg;
-    private ArrayList<byte[]> hashedMessages;//to verify with server's response
+    private ArrayList<String> hashedMessages;//to verify with server's response
 
 
 
@@ -44,24 +47,36 @@ public class Client {
 
 
 
-    public static void main(String[] args) throws IOException{
+    public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
         String hostname = "localhost";
-        int port = 1090;
+        int port = 6548;
+        ArrayList<String> hashes = new ArrayList<>();
         try {
             //connect to cs455.scaling.server
             client = SocketChannel.open(new InetSocketAddress(hostname,port));
             //create buffer
-            buffer = ByteBuffer.allocate(256);
+            buffer = ByteBuffer.allocate(8000);
         } catch (IOException e){
-            System.err.println("error connecting to cs455.scaling.server, stacktrace:...");
+            System.err.println("::Client: error connecting to cs455.scaling.server, stacktrace:...");
             e.printStackTrace();
         }
 
-        buffer = ByteBuffer.wrap("Please send this back to me.".getBytes());
+//        buffer = ByteBuffer.wrap("Please send this back to me.".getBytes());
+
+        RandomPacket randomPacket = new RandomPacket();
+        byte[] msg = randomPacket.generate();
+        String hash = randomPacket.hash(msg);
+        hashes.add(hash);
+        System.out.println("hash out: " + hash);
+        buffer = ByteBuffer.wrap(msg);
+
+
+
         String response = null;
         try {
             client.write(buffer);
             buffer.clear();
+            buffer = ByteBuffer.allocate(256);
             client.read(buffer);
             response = new String(buffer.array()).trim();
             System.out.println("Server responded with: " + response);

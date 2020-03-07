@@ -1,6 +1,8 @@
 package cs455.scaling.server;
 
 
+import cs455.scaling.bytes.RandomPacket;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -8,7 +10,9 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.security.NoSuchAlgorithmException;
 import java.util.Iterator;
+import java.util.Random;
 import java.util.Set;
 
 public class Server {
@@ -27,33 +31,43 @@ public class Server {
 
     }
 
-    private static void readAndRespond(SelectionKey key) throws IOException {
+
+    private static void readAndRespond(SelectionKey key) throws IOException, NoSuchAlgorithmException {
         //create buffer to write into
-        ByteBuffer buffer = ByteBuffer.allocate(256);
+        ByteBuffer buffer = ByteBuffer.allocate(8000);
 
         //grab the socket from the key
         SocketChannel client = (SocketChannel) key.channel();
         //Read from it
         int bytesRead = client.read(buffer);
         //handle a closed connection
-        if(bytesRead == -1){
+        if(bytesRead == -1) {
             client.close();
-            System.out.println("\t\tReceived: " + new String(buffer.array()));
+            System.out.println("client disconnected.");
+        } else {
+            RandomPacket r = new RandomPacket();
+            byte[] msg = buffer.array();
+            String hash = r.hash(msg);
+            System.out.println("\t\tReceived: " );
+            r.printBytes(msg);
+            System.out.println("apparent hash: " + hash);
             //flip the buffer to new write
             buffer.flip();
+            buffer = ByteBuffer.allocate(256);
+            buffer = ByteBuffer.wrap(hash.getBytes());
             client.write(buffer);
             //clear the buffer
             buffer.clear();
         }
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
         //open selector
         Selector selector = Selector.open();
         //create input channel
         ServerSocketChannel serverSocket = ServerSocketChannel.open();
-        String hostname = "localhost";
-        int port = 1090;
+        String hostname = args[0];
+        int port = Integer.parseInt(args[1]);
         serverSocket.bind(new InetSocketAddress(hostname,port));
         serverSocket.configureBlocking(false);
         //register our channel to the selector
@@ -76,12 +90,16 @@ public class Server {
 
                 //Optional
                 if(key.isValid() == false){
-                    register(selector, serverSocket);
-
+//                    register(selector, serverSocket);
+                    continue;
+                }
+                if(key.isAcceptable()){
+                    register(selector,serverSocket);
                 }
 
                 //previous connection has data to read
                 if(key.isReadable()) {
+                    System.out.println("reading");
                     readAndRespond(key);
                 }
 

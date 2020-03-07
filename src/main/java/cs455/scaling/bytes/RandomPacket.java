@@ -2,6 +2,8 @@ package cs455.scaling.bytes;
 
 // maybe make one, use a generator function within it to avoid overhead
 
+import java.math.BigInteger;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 
@@ -19,6 +21,35 @@ public class RandomPacket {
         for(byte b : msg){
             System.out.println(b);
         }
+    }
+
+    public String hash(byte[] data) throws NoSuchAlgorithmException {
+        MessageDigest digest = MessageDigest.getInstance("SHA1");
+        byte[] hash  = digest.digest(data);
+        BigInteger hashInt = new BigInteger(1, hash);
+
+//        pad with leading 0's so size == 40,
+//         it may have been stripped of leading 0's
+        String hashString = hashInt.toString(16);
+        while(hashString.length() < 40){
+            hashString = "0" + hashString;
+        }
+        return hashString;
+    }
+    public void printBytes(byte[] bytes){
+        int fourcount = 4;
+        System.out.println("---- BEGIN ----");
+        System.out.println(">------<");
+        for(byte b : bytes){
+            System.out.println(b);
+            fourcount--;
+            if(fourcount == 0){
+                System.out.println(">------<");
+                fourcount = 4;
+            }
+        }
+        System.out.println("----  END  ----");
+
     }
 
     public static void main(String[] args) throws NoSuchAlgorithmException {

@@ -66,6 +66,8 @@ public class testServer {
         }
     }
 
+
+
     public static void main(String[] args) throws IOException {
         //open selector
         Selector selector = Selector.open();
@@ -94,16 +96,28 @@ public class testServer {
             Set<SelectionKey> selectedKeys = selector.selectedKeys();
             //loop over ready keys
             Iterator<SelectionKey> iter = selectedKeys.iterator();
+
             while(iter.hasNext()) {
                 //grab current key
                 SelectionKey key = iter.next();
+                if(key.isValid() == false){
+                    continue;
+                }
                 if( key.isAcceptable() ) {
-                    //CONNECTION ACCEPTED
-
+                    //CONNECTION ACCEPTED, new connection establish on own socket
+                    register(selector, serverSocket);
                 }
                 else if ( key.isReadable() ) {
                     // channel ready for reading
-                    SocketChannel socketChannel = (SocketChannel) key.channel();
+//                    SocketChannel socketChannel = (SocketChannel) key.channel();
+                    //
+                    // // read and respond
+                    //
+
+                }
+                else if ( key.isWritable() ) {
+                    // ready to be written to
+                    // channel.writable() == 0 >> 0 bytes written, channel not writable
                 }
                 iter.remove();
 
@@ -111,8 +125,7 @@ public class testServer {
 
 
 //                //Optional
-//                if(key.isValid() == false){
-//                    register(selector, serverSocket);
+
 //
 //                }
 //
