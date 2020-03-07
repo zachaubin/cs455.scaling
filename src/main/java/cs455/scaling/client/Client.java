@@ -2,8 +2,10 @@ package cs455.scaling.client;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.util.ArrayList;
 
 /*
  (1)Connect and maintain an active connection to the server.
@@ -18,6 +20,29 @@ import java.nio.channels.SocketChannel;
 public class Client {
     private static SocketChannel client;
     private static ByteBuffer buffer;
+    private byte[] msg;
+    private ArrayList<byte[]> hashedMessages;//to verify with server's response
+
+
+
+//    //registering server socket channels
+//
+//    SocketChannel socketChannel = serverSocket.accept();
+//    socketChannel.configureBlocking(false);
+//    socketChannel.register( selector, SelectionKey.OP_READ);
+
+    public static void register() throws IOException {
+
+        String hostname = "localhost";
+        int port = 6548;
+
+        SocketChannel socketChannel = SocketChannel.open();
+        socketChannel.configureBlocking(false);
+        socketChannel.connect( new InetSocketAddress( hostname, port ));
+    }
+
+
+
 
     public static void main(String[] args) throws IOException{
         String hostname = "localhost";

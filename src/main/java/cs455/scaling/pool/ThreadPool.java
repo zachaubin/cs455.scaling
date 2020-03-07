@@ -12,9 +12,7 @@ public class ThreadPool {
         queue = new LinkedBlockingQueue();
         swimmers = new Swimmer[maxThreads];
 
-        //in class we said starting .start() in a constructor was bad
-        // maybe we also said it's okay for a thread pool
-        // // I hope this is not a bad idea because right now it works
+        //start thread containers
         for (int i = 0; i < maxThreads; i++) {
             swimmers[i] = new Swimmer();
             swimmers[i].start();
