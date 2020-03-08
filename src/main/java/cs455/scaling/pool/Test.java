@@ -9,7 +9,7 @@ public class Test {
         } else {
             maxThreads = 4;
         }
-        ThreadPool pool = new ThreadPool(maxThreads);
+        ThreadPool pool = new ThreadPool(maxThreads,3);
         for (int i = 0; i < 50; i++) {
             PrintBot task = new PrintBot(i);
             pool.execute(task);

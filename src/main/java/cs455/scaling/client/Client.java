@@ -10,6 +10,8 @@ import java.nio.channels.SocketChannel;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
+import static java.lang.Thread.sleep;
+
 /*
  (1)Connect and maintain an active connection to the server.
  (2)Regularly send data packets to the server. The payloads for these data packets are 8 KB and the  values  for
@@ -25,7 +27,14 @@ public class Client {
     private static ByteBuffer buffer;
     private byte[] msg;
     private ArrayList<String> hashedMessages;//to verify with server's response
+    private volatile ArrayList<String> hashes;
+    RandomPacket randomPacket;
 
+    public Client(){
+        this.hashes = new ArrayList<>();
+        this.randomPacket = new RandomPacket();
+
+    }
 
 
 //    //registering server socket channels
@@ -44,13 +53,67 @@ public class Client {
         socketChannel.connect( new InetSocketAddress( hostname, port ));
     }
 
+    private class SendMessage implements Runnable {
+
+
+        @Override
+        public void run() {
+            byte[] msg = randomPacket.generate();
+            String hash = null;
+            try {
+                hash = randomPacket.hash(msg);
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            }
+            synchronized (hashes) {
+                hashes.add(hash);
+            }
+
+            System.out.println("             hash out: "+hash);
+
+            buffer = ByteBuffer.wrap(msg);
+        }
+
+
+    }
+    private void sendMessage(){
+        byte[] msg = randomPacket.generate();
+        String hash = null;
+        try {
+            hash = randomPacket.hash(msg);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        synchronized (hashes) {
+            hashes.add(hash);
+        }
+
+        System.out.println("             hash out: "+hash);
+
+        buffer = ByteBuffer.wrap(msg);
+    }
 
 
 
-    public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
+
+
+
+    public static void main(String[] args) throws IOException, NoSuchAlgorithmException, InterruptedException {
+
         String hostname = "localhost";
         int port = 6548;
-        ArrayList<String> hashes = new ArrayList<>();
+        int messageRate = 1;
+        try {
+            hostname = args[0];
+            port = Integer.parseInt(args[1]);
+            messageRate = Integer.parseInt(args[2]);
+        } catch(Exception e){
+            System.out.println("Usage: ");
+            System.out.println("java cs455.scaling.client.Client [server-host] [server-port] [message-rate-per-sec]");
+            return;
+        }
+
+
         try {
             //connect to cs455.scaling.server
             client = SocketChannel.open(new InetSocketAddress(hostname,port));
@@ -62,28 +125,29 @@ public class Client {
         }
 
 //        buffer = ByteBuffer.wrap("Please send this back to me.".getBytes());
-
-        RandomPacket randomPacket = new RandomPacket();
-        byte[] msg = randomPacket.generate();
-        String hash = randomPacket.hash(msg);
-        hashes.add(hash);
-        System.out.println("hash out: " + hash);
-        buffer = ByteBuffer.wrap(msg);
+        Client node = new Client();
 
 
+        while(true) {
 
-        String response = null;
-        try {
-            client.write(buffer);
-            buffer.clear();
-            buffer = ByteBuffer.allocate(256);
-            client.read(buffer);
-            response = new String(buffer.array()).trim();
-            System.out.println("Server responded with: " + response);
-            buffer.clear();
-        } catch (IOException e){
-            System.err.println("error receiving from cs455.scaling.server, stacktrace:...");
-            e.printStackTrace();
+            sleep(1000/messageRate);
+            node.sendMessage();
+
+            String response = null;
+            try {
+                client.write(buffer);
+                buffer.clear();
+                buffer = ByteBuffer.allocate(256);
+                client.read(buffer);
+                response = new String(buffer.array()).trim();
+                System.out.println("Server responded with: " + response);
+                System.out.println("");
+                buffer.clear();
+                buffer = ByteBuffer.allocate(8000);
+            } catch (IOException e) {
+                System.err.println("error receiving from cs455.scaling.server, stacktrace:...");
+                e.printStackTrace();
+            }
         }
     }
 }
