@@ -131,31 +131,116 @@ public class Client {
         Thread ctThread = new Thread(ct);
         ctThread.start();
 
+        //sender
+        int finalMessageRate = messageRate;
+        Thread senderThread = new Thread( ){
+            public void run(){
+                ByteBuffer senderBuffer = null;
+                senderBuffer.allocate(80000);
+                RandomPacket packet = new RandomPacket();
 
-        while(true) {
 
-            sleep(1000/messageRate);
-            node.sendMessage();
-            ct.sent.incrementAndGet();
+                while(true) {
 
-            String response = null;
-            try {
-                client.write(buffer);
-                buffer.clear();
+                    try {
+                        sleep(1000 / finalMessageRate);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    byte[] msg = packet.generate();
+                    String hash = null;
+                    try {
+                        hash = packet.hash(msg);
+                    } catch (NoSuchAlgorithmException e) {
+                        e.printStackTrace();
+                    }
+                    synchronized (node.hashes) {
+                        node.hashes.add(hash);
+                    }
+
+//        System.out.println("             hash out: "+hash);
+
+                    senderBuffer = ByteBuffer.wrap(msg);
+                    try {
+                        client.write(senderBuffer);
+                        ct.sent.incrementAndGet();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    senderBuffer.clear();
+                }
+            }
+        };
+        senderThread.start();
+
+        //receiver
+        Thread receiverThread = new Thread() {
+            public void run() {
+
                 buffer = ByteBuffer.allocate(256);
-                client.read(buffer);
-                response = new String(buffer.array()).trim();
-
+                try {
+                    client.read(buffer);
+                } catch (IOException e) {
+                    System.exit(1);
+                    e.printStackTrace();
+                }
+                String response = new String(buffer.array()).trim();
+                ct.received.incrementAndGet();
 //                System.out.println("Server responded with: " + response);
 //                System.out.println("");
                 buffer.clear();
-                buffer = ByteBuffer.allocate(8000);
-            } catch (IOException e) {
-                System.err.println("error receiving from cs455.scaling.server, stacktrace:...");
-                e.printStackTrace();
-                System.exit(1);
             }
-            ct.received.incrementAndGet();
-        }
+        };
+        receiverThread.start();
+
+//        while(true) {
+//
+//            sleep(1000/messageRate);
+//            node.sendMessage();
+//            ct.sent.incrementAndGet();
+//
+//            String response = null;
+//            try {
+//                client.write(buffer);
+//                buffer.clear();
+//                buffer = ByteBuffer.allocate(256);
+//                client.read(buffer);
+//                response = new String(buffer.array()).trim();
+//
+////                System.out.println("Server responded with: " + response);
+////                System.out.println("");
+//                buffer.clear();
+//                buffer = ByteBuffer.allocate(8000);
+//            } catch (IOException e) {
+//                System.err.println("error receiving from cs455.scaling.server, stacktrace:...");
+//                e.printStackTrace();
+//                System.exit(1);
+//            }
+//            ct.received.incrementAndGet();
+//        }
+//    }
+//    private class Sender implements Runnable {
+//        int messageRate;
+//        Client caller;
+//        SocketChannel socketChannel;
+//
+//        Sender(int rate, Client node, SocketChannel socketChannel){
+//            this.caller = node;
+//            messageRate = rate;
+//            this.socketChannel = socketChannel;
+//        }
+//
+//        @Override
+//        public void run() {
+//
+//        }
+//    }
+//    private class Receiver implements Runnable {
+//
+//        @Override
+//        public void run() {
+//
+//        }
     }
 }

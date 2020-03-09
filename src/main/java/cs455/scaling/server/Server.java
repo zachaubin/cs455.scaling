@@ -194,17 +194,21 @@ public class Server {
 
             //Keys are ready
             Set<SelectionKey> selectedKeys = selector.selectedKeys();
+
+//            System.out.println("selectedKeys.size()="+selectedKeys.size());
             //loop over ready keys
             Iterator<SelectionKey> iter = selectedKeys.iterator();
             while(iter.hasNext()) {
                 //grab current key
                 SelectionKey key = iter.next();
+                System.out.println("key: "+key);
 
                 //Optional
                 if(key.isValid() == false){
 //                    register(selector, serverSocket);
                     sleep(100);
                     iter.remove();
+                    System.out.println("not valid key?");
 
                     continue;
                 }
@@ -212,6 +216,9 @@ public class Server {
                     register(selector,serverSocket);
                     tracker.connections.incrementAndGet();
 //                    System.out.println("??registering");
+                }
+                if(key.isWritable()){
+                    break;
                 }
 
                 //previous connection has data to read
@@ -226,9 +233,13 @@ public class Server {
                     sleep(69);
 //                    threadPool.execute(new PrintBot(0));
 //                    readAndRespond(key);
-                    break;
+//                    break;
 
+                    key.interestOps(SelectionKey.OP_WRITE);
+                    System.out.println("set key to op write");
                 }
+
+
 
                 //remove it from our set
                 iter.remove();
