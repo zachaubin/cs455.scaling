@@ -7,12 +7,14 @@ import cs455.scaling.pool.ThreadPool;
 import cs455.scaling.stats.Tracker;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Iterator;
 import java.util.Random;
@@ -21,6 +23,7 @@ import java.util.Set;
 import static java.lang.Thread.sleep;
 
 public class Server {
+    public RandomPacket randomPacket = new RandomPacket();
 
 
     public Server() throws IOException {
@@ -42,7 +45,9 @@ public class Server {
 
         RNR(SelectionKey k ){
             key = k;
+
         }
+
 
         @Override
         public void run() {
@@ -87,6 +92,29 @@ public class Server {
             //clear the buffer
             buffer.clear();
         }
+    }
+    public static byte[] readMsgFromKey(SelectionKey key) throws IOException, NoSuchAlgorithmException {
+        //create buffer to write into
+        ByteBuffer buffer = ByteBuffer.allocate(8000);
+
+        //grab the socket from the key
+        SocketChannel client = (SocketChannel) key.channel();
+        //Read from it
+        int bytesRead = client.read(buffer);
+        byte[] msg = null;
+        //handle a closed connection
+        if(bytesRead == -1) {
+            client.close();
+            System.out.println("client disconnected.");
+        } else {
+            msg = buffer.array();
+            buffer.clear();
+        }
+        return msg;
+    }
+    public static void respondToKey(SelectionKey key){
+        String hash = hash(key.attachment());
+
     }
     private static class ReadAndRespond implements Runnable {
 
@@ -149,6 +177,19 @@ public class Server {
 //                }
 //            }
         }
+    }
+    public String hash(Object data) throws NoSuchAlgorithmException {
+        MessageDigest digest = MessageDigest.getInstance("SHA1");
+        byte[] hash  = (byte[]) digest.digest(data);
+        BigInteger hashInt = new BigInteger(1, hash);
+
+//        pad with leading 0's so size == 40,
+//         it may have been stripped of leading 0's
+        String hashString = hashInt.toString(16);
+        while(hashString.length() < 40){
+            hashString = "0" + hashString;
+        }
+        return hashString;
     }
 
     public static void main(String[] args) throws IOException, NoSuchAlgorithmException, InterruptedException {
@@ -228,6 +269,7 @@ public class Server {
 //                    System.out.println("reading, key="+key);
 
 //                    RNR rnr = new RNR(key);
+                    // read first, then pass byte[] to execute()
 
                     threadPool.execute(key);
                     sleep(69);
