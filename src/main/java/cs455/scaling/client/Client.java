@@ -1,6 +1,7 @@
 package cs455.scaling.client;
 
 import cs455.scaling.bytes.RandomPacket;
+import cs455.scaling.stats.ClientTracker;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -69,7 +70,7 @@ public class Client {
                 hashes.add(hash);
             }
 
-            System.out.println("             hash out: "+hash);
+//            System.out.println("             hash out: "+hash);
 
             buffer = ByteBuffer.wrap(msg);
         }
@@ -88,7 +89,7 @@ public class Client {
             hashes.add(hash);
         }
 
-        System.out.println("             hash out: "+hash);
+//        System.out.println("             hash out: "+hash);
 
         buffer = ByteBuffer.wrap(msg);
     }
@@ -126,12 +127,16 @@ public class Client {
 
 //        buffer = ByteBuffer.wrap("Please send this back to me.".getBytes());
         Client node = new Client();
+        ClientTracker ct = new ClientTracker(5);
+        Thread ctThread = new Thread(ct);
+        ctThread.start();
 
 
         while(true) {
 
             sleep(1000/messageRate);
             node.sendMessage();
+            ct.sent.incrementAndGet();
 
             String response = null;
             try {
@@ -140,14 +145,17 @@ public class Client {
                 buffer = ByteBuffer.allocate(256);
                 client.read(buffer);
                 response = new String(buffer.array()).trim();
-                System.out.println("Server responded with: " + response);
-                System.out.println("");
+
+//                System.out.println("Server responded with: " + response);
+//                System.out.println("");
                 buffer.clear();
                 buffer = ByteBuffer.allocate(8000);
             } catch (IOException e) {
                 System.err.println("error receiving from cs455.scaling.server, stacktrace:...");
                 e.printStackTrace();
+                System.exit(1);
             }
+            ct.received.incrementAndGet();
         }
     }
 }

@@ -2,29 +2,24 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="44a7fdd6-525b-46a6-a052-f689853ba62c" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/cs455/scaling/client/SendAMessage.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/cs455/scaling/pool/CumberBatcher.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/cs455/scaling/stats/ClientTracker.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/cs455/scaling/stats/Tracker.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/4.4.1/fileHashes/fileHashes.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.4.1/fileHashes/fileHashes.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/4.4.1/fileHashes/fileHashes.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.4.1/fileHashes/fileHashes.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/4.4.1/taskHistory/taskHistory.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.4.1/taskHistory/taskHistory.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/4.4.1/taskHistory/taskHistory.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.4.1/taskHistory/taskHistory.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/classes/java/main/cs455/scaling/client/Client$SendMessage.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/cs455/scaling/client/Client$SendMessage.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build/classes/java/main/cs455/scaling/client/Client.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/cs455/scaling/client/Client.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/cs455/scaling/client/MessageSender.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/cs455/scaling/pool/Test.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/cs455/scaling/pool/Test.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build/classes/java/main/cs455/scaling/pool/ThreadPool$Swimmer.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/cs455/scaling/pool/ThreadPool$Swimmer.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build/classes/java/main/cs455/scaling/pool/ThreadPool.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/cs455/scaling/pool/ThreadPool.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/classes/java/main/cs455/scaling/server/Server$ReadAndRespond.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/cs455/scaling/server/Server$ReadAndRespond.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build/classes/java/main/cs455/scaling/server/Server.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/cs455/scaling/server/Server.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/cs455/scaling/server/ThreadPool.class" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/build/libs/cs455.scaling-1.0-SNAPSHOT.jar" beforeDir="false" afterPath="$PROJECT_DIR$/build/libs/cs455.scaling-1.0-SNAPSHOT.jar" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/cs455/scaling/client/Client.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/cs455/scaling/client/Client.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/cs455/scaling/client/MessageSender.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/cs455/scaling/pool/Test.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/cs455/scaling/pool/Test.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/cs455/scaling/pool/ThreadPool.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/cs455/scaling/pool/ThreadPool.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/cs455/scaling/server/Server.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/cs455/scaling/server/Server.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/cs455/scaling/server/ThreadPool.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/cs455/scaling/task/Message.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/cs455/scaling/task/Message.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -85,7 +80,8 @@
       <workItem from="1582652371828" duration="4719000" />
       <workItem from="1583148711608" duration="3784000" />
       <workItem from="1583252533887" duration="18761000" />
-      <workItem from="1583594403868" duration="25533000" />
+      <workItem from="1583594403868" duration="26140000" />
+      <workItem from="1583684910678" duration="11923000" />
     </task>
     <servers />
   </component>
@@ -93,10 +89,10 @@
     <option name="version" value="1" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="768" y="237" width="380" height="572" key="#com.intellij.ide.util.MemberChooser" timestamp="1583630925285">
+    <state x="768" y="237" width="380" height="572" key="#com.intellij.ide.util.MemberChooser" timestamp="1583717047561">
       <screen x="0" y="0" width="1920" height="1047" />
     </state>
-    <state x="768" y="237" width="380" height="572" key="#com.intellij.ide.util.MemberChooser/0.0.1920.1047@0.0.1920.1047" timestamp="1583630925285" />
+    <state x="768" y="237" width="380" height="572" key="#com.intellij.ide.util.MemberChooser/0.0.1920.1047@0.0.1920.1047" timestamp="1583717047561" />
     <state x="776" y="453" key="#com.intellij.refactoring.move.MoveHandler.SelectRefactoringDialog" timestamp="1582654825897">
       <screen x="0" y="0" width="1920" height="1047" />
     </state>

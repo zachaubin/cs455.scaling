@@ -4,6 +4,7 @@ package cs455.scaling.server;
 import cs455.scaling.bytes.RandomPacket;
 import cs455.scaling.pool.PrintBot;
 import cs455.scaling.pool.ThreadPool;
+import cs455.scaling.stats.Tracker;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -35,8 +36,28 @@ public class Server {
 
     }
 
+    static class RNR implements Runnable {
 
-    private static void readAndRespond(SelectionKey key) throws IOException, NoSuchAlgorithmException {
+        SelectionKey key;
+
+        RNR(SelectionKey k ){
+            key = k;
+        }
+
+        @Override
+        public void run() {
+            try {
+                readAndRespond(key);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
+    public static void readAndRespond(SelectionKey key) throws IOException, NoSuchAlgorithmException {
         //create buffer to write into
         ByteBuffer buffer = ByteBuffer.allocate(8000);
 
@@ -57,7 +78,7 @@ public class Server {
 
 //            System.out.println("\t\tReceived: " );
 //            r.printBytes(msg);
-            System.out.println("apparent hash: " + hash);
+//            System.out.println("apparent hash: " + hash);
             //flip the buffer to new write
             buffer.flip();
             buffer = ByteBuffer.allocate(256);
@@ -77,55 +98,56 @@ public class Server {
 
         @Override
         public void run() {
-            synchronized (this) {
-                //create buffer to write into
-                ByteBuffer buffer = ByteBuffer.allocate(8000);
-
-                //grab the socket from the key
-                SocketChannel client = (SocketChannel) key.channel();
-                //Read from it
-                int bytesRead = 0;
-                try {
-                    bytesRead = client.read(buffer);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                //handle a closed connection
-                if (bytesRead == -1) {
-                    try {
-                        client.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    System.out.println("client disconnected.");
-                } else {
-                    RandomPacket r = new RandomPacket();
-
-                    byte[] msg = buffer.array();
-                    String hash = null;
-                    try {
-                        hash = r.hash(msg);
-                    } catch (NoSuchAlgorithmException e) {
-                        e.printStackTrace();
-                    }
-                    // ##stats## add +1 to msgs processed
-
-//            System.out.println("\t\tReceived: " );
-//            r.printBytes(msg);
-                    System.out.println("apparent hash: " + hash);
-                    //flip the buffer to new write
-                    buffer.flip();
-                    buffer = ByteBuffer.allocate(256);
-                    buffer = ByteBuffer.wrap(hash.getBytes());
-                    try {
-                        client.write(buffer);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    //clear the buffer
-                    buffer.clear();
-                }
-            }
+//            synchronized (this) {
+//                System.out.println("##############################staring task.run()");
+//                //create buffer to write into
+//                ByteBuffer buffer = ByteBuffer.allocate(8000);
+//
+//                //grab the socket from the key
+//                SocketChannel client = (SocketChannel) key.channel();
+//                //Read from it
+//                int bytesRead = 0;
+//                try {
+//                    bytesRead = client.read(buffer);
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//                //handle a closed connection
+//                if (bytesRead == -1) {
+//                    try {
+//                        client.close();
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
+//                    System.out.println("client disconnected.");
+//                } else {
+//                    RandomPacket r = new RandomPacket();
+//
+//                    byte[] msg = buffer.array();
+//                    String hash = null;
+//                    try {
+//                        hash = r.hash(msg);
+//                    } catch (NoSuchAlgorithmException e) {
+//                        e.printStackTrace();
+//                    }
+//                    // ##stats## add +1 to msgs processed
+//
+////            System.out.println("\t\tReceived: " );
+////            r.printBytes(msg);
+////                    System.out.println("apparent hash: " + hash);
+//                    //flip the buffer to new write
+//                    buffer.flip();
+//                    buffer = ByteBuffer.allocate(256);
+//                    buffer = ByteBuffer.wrap(hash.getBytes());
+//                    try {
+//                        client.write(buffer);
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
+//                    //clear the buffer
+//                    buffer.clear();
+//                }
+//            }
         }
     }
 
@@ -157,13 +179,18 @@ public class Server {
         serverSocket.register(selector, SelectionKey.OP_ACCEPT);
 
         ThreadPool threadPool = new ThreadPool(poolSize,batchSize);
+        threadPool.poolOn();
+        Tracker tracker = new Tracker(5);
+        Thread trackerThread = new Thread(tracker);
+        trackerThread.start();
 
         //loop on selector
         while(true) {
 //            System.out.println("listening for new connection or new messages on >>> host["+hostname+"]:port["+port+"]");
             //block here
-            selector.select();
-            System.out.println("\tActivity on selector!");
+            boolean flag = false;
+            int test = selector.select();
+//            System.out.println("\tActivity on selector!: " + test);
 
             //Keys are ready
             Set<SelectionKey> selectedKeys = selector.selectedKeys();
@@ -177,19 +204,30 @@ public class Server {
                 if(key.isValid() == false){
 //                    register(selector, serverSocket);
                     sleep(100);
+                    iter.remove();
+
                     continue;
                 }
                 if(key.isAcceptable()){
                     register(selector,serverSocket);
+                    tracker.connections.incrementAndGet();
+//                    System.out.println("??registering");
                 }
 
                 //previous connection has data to read
                 if(key.isReadable()) {
-                    System.out.println("reading");
+                    tracker.msgs.incrementAndGet();
 
-                    threadPool.execute(new ReadAndRespond(key));
+//                    System.out.println("reading, key="+key);
+
+//                    RNR rnr = new RNR(key);
+
+                    threadPool.execute(key);
+                    sleep(69);
 //                    threadPool.execute(new PrintBot(0));
 //                    readAndRespond(key);
+                    break;
+
                 }
 
                 //remove it from our set
