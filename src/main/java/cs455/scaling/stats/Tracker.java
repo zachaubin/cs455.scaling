@@ -57,10 +57,8 @@ public class Tracker implements Runnable {
         meanThroughput.lazySet((meanThroughput.get() + throughput) / iterations.get() );
         System.out.println("         Server Throughput: " + throughput);
         System.out.println(" Active Client Connections: " + cn);
-        System.out.println("Mean Per-client Throughput: " + mean);
-        System.out.println("        Standard Deviation: " + stddevFinal);
-        System.out.println("     Per-client Throughput: " + throughput/cn);
-
+        System.out.println("Mean Per-client Throughput: " + throughput/cn);
+        System.out.println("   Std. Dev. Per-Client TP: " + stddevFinal);
 
         msgs.lazySet(0);
     }

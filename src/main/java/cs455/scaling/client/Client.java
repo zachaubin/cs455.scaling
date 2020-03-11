@@ -141,9 +141,9 @@ public class Client {
                             String token = response.substring(start,start+40);
                         synchronized (node.hashes) {
                             if (!node.hashes.contains(token)) {
-                                System.out.println("Bad! Unexpected hash received from Server.");
-                                System.out.println("     hash: " + token);
-                                ct.badHashes.incrementAndGet();
+//                                System.out.println("Bad! Unexpected hash received from Server.");
+//                                System.out.println("     hash: " + token);
+//                                ct.badHashes.incrementAndGet();
                             } else {
                                 node.hashes.remove(token);
                                 count++;

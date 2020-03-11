@@ -27,9 +27,9 @@ public class ClientTracker implements Runnable {
         System.out.println("--------Timestamp: "+ t);
         System.out.println("    Messages Sent: " + sent.get());
         System.out.println("Messages Received: " + received.get());
-        if(badHashes.get() > 0){
-            System.out.println("       Bad Hashes: " + badHashes.get());
-        }
+//        if(badHashes.get() > 0){
+//            System.out.println("       Bad Hashes: " + badHashes.get());
+//        }
     }
 
     @Override

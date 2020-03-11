@@ -8,7 +8,7 @@ Server:
 java -cp ./build/libs/cs455.scaling-1.0-SNAPSHOT.jar cs455.scaling.server.Server [port] [thread-pool-size] [batch-size] [batch-time]
  ( e.g. java -cp ./build/libs/cs455.scaling-1.0-SNAPSHOT.jar cs455.scaling.server.Server 4568 8 8 1)
 
-Client
+Client:
 java -cp ./build/libs/cs455.scaling-1.0-SNAPSHOT.jar cs455.scaling.client.Client [server-host] [server-port] [message-rate-per-sec]
  ( e.g. java -cp ./build/libs/cs455.scaling-1.0-SNAPSHOT.jar cs455.scaling.client.Client localhost 4568 4)
 
