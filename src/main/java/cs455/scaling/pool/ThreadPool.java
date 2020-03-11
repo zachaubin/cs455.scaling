@@ -180,7 +180,7 @@ public class ThreadPool {
                                 if(keys == null) continue;
                                 if(keys.size() == 0) continue;
                                 for( SelectionKey key : keys){
-                                    System.out.println("key from unfinished batch:");//+key);
+//                                    System.out.println("key from unfinished batch:");//+key);
                                     batch.add(key);
                                 }
                                 keys.clear();
@@ -195,7 +195,7 @@ public class ThreadPool {
                                 server.readAndRespond(key,tracker);
                                 key.attach(0);
                             }
-                            System.out.println("running task");
+//                            System.out.println("running task");
 //                            key.interestOps(key.interestOps() | SelectionKey.OP_READ);
 //                            sleep(69);
                             // concurrency issue? synchronize the run method of task object

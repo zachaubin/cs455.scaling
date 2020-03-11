@@ -65,8 +65,8 @@ public class Server {
                     //flip the buffer to new write
                     buffer.flip();
                     buffer = ByteBuffer.allocate(40);
-                    System.out.println("hash:"+hash);
-                    System.out.println("hash.size():"+hash.length());
+//                    System.out.println("hash:"+hash);
+//                    System.out.println("hash.size():"+hash.length());
                     buffer = ByteBuffer.wrap(hash.getBytes(),0,40);
                     client.write(buffer);
                     //clear the buffer
@@ -139,7 +139,7 @@ public class Server {
                 if(key.isReadable() && (key.attachment() == (Object)0 || key.attachment() == null) ) {
                     tracker.msgs.incrementAndGet();
                     threadPool.execute(key);
-                    System.out.println("::Server: execute(key)");
+//                    System.out.println("::Server: execute(key)");
                 }
                 iter.remove();
             }
