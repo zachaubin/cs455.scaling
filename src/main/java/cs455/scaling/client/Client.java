@@ -3,13 +3,17 @@ package cs455.scaling.client;
 import cs455.scaling.bytes.RandomPacket;
 import cs455.scaling.stats.ClientTracker;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Set;
 
 import static java.lang.Thread.sleep;
 
@@ -31,73 +35,19 @@ public class Client {
     private volatile ArrayList<String> hashes;
     RandomPacket randomPacket;
 
+
     public Client(){
         this.hashes = new ArrayList<>();
         this.randomPacket = new RandomPacket();
-
     }
 
-
-//    //registering server socket channels
-//
-//    SocketChannel socketChannel = serverSocket.accept();
-//    socketChannel.configureBlocking(false);
-//    socketChannel.register( selector, SelectionKey.OP_READ);
-
-    public static void register() throws IOException {
-
-        String hostname = "localhost";
-        int port = 6548;
-
-        SocketChannel socketChannel = SocketChannel.open();
-        socketChannel.configureBlocking(false);
-        socketChannel.connect( new InetSocketAddress( hostname, port ));
-    }
-
-    private class SendMessage implements Runnable {
-
-
-        @Override
-        public void run() {
-            byte[] msg = randomPacket.generate();
-            String hash = null;
-            try {
-                hash = randomPacket.hash(msg);
-            } catch (NoSuchAlgorithmException e) {
-                e.printStackTrace();
-            }
-            synchronized (hashes) {
-                hashes.add(hash);
-            }
-
-//            System.out.println("             hash out: "+hash);
-
-            buffer = ByteBuffer.wrap(msg);
+    public static byte[] getSliceOfArray(byte[] arr, int start, int end) {
+        byte[] slice = new byte[end - start];
+        for (int i = 0; i < slice.length; i++) {
+            slice[i] = arr[start + i];
         }
-
-
+        return slice;
     }
-    private void sendMessage(){
-        byte[] msg = randomPacket.generate();
-        String hash = null;
-        try {
-            hash = randomPacket.hash(msg);
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        synchronized (hashes) {
-            hashes.add(hash);
-        }
-
-//        System.out.println("             hash out: "+hash);
-
-        buffer = ByteBuffer.wrap(msg);
-    }
-
-
-
-
-
 
     public static void main(String[] args) throws IOException, NoSuchAlgorithmException, InterruptedException {
 
@@ -133,7 +83,7 @@ public class Client {
 
         //sender
         int finalMessageRate = messageRate;
-        Thread senderThread = new Thread( ){
+        Thread senderThread = new Thread(){
             public void run(){
                 ByteBuffer senderBuffer = null;
                 senderBuffer.allocate(80000);
@@ -152,14 +102,16 @@ public class Client {
                     String hash = null;
                     try {
                         hash = packet.hash(msg);
+//                        System.out.println("             hash out: "+hash);
+
                     } catch (NoSuchAlgorithmException e) {
                         e.printStackTrace();
                     }
                     synchronized (node.hashes) {
                         node.hashes.add(hash);
                     }
-
-//        System.out.println("             hash out: "+hash);
+//                    System.out.println("msg.size()="+msg.length);
+//                    System.out.println("hash.size()="+hash.length());
 
                     senderBuffer = ByteBuffer.wrap(msg);
                     try {
@@ -167,80 +119,76 @@ public class Client {
                         ct.sent.incrementAndGet();
                     } catch (IOException e) {
                         e.printStackTrace();
+                        System.exit(1);
                     }
-                    senderBuffer.clear();
                 }
             }
         };
         senderThread.start();
 
         //receiver
-        Thread receiverThread = new Thread() {
+        Thread receiverThread = new Thread(){
             public void run() {
+                ByteBuffer receiverBuffer = null;
+//                receiverBuffer.allocate(20);
 
-                buffer = ByteBuffer.allocate(256);
-                try {
-                    client.read(buffer);
-                } catch (IOException e) {
-                    System.exit(1);
-                    e.printStackTrace();
+                while (true) {
+
+                    receiverBuffer = ByteBuffer.allocate(40);
+                    int check = 0;
+                    try {
+                        check = client.read(receiverBuffer);
+//                        System.out.println("read returned: "+check);
+                        if(check < 0) continue;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        System.exit(1);
+                    }
+//                    byte[] allBytes = receiverBuffer.array();
+//                    receiverBuffer.rewind();
+//                    System.out.println("\n\n\n allBytes.len = " + allBytes.length);
+//                    byte[] dst = new byte[40];
+//                    while(check >39) {
+//                        receiverBuffer.get(dst, 0, 40);
+//                        dst = getSliceOfArray(allBytes,start,check);
+//                        check -= 40;
+//                        start += 40;
+//                        System.out.println("dst="+dst);
+//                        BigInteger hashInt = new BigInteger(1, dst);
+
+                        //        pad with leading 0's so size == 40,
+                        //         it may have been stripped of leading 0's
+//                        String response = hashInt.toString(16);
+
+                        String response = new String(receiverBuffer.array()).trim();
+//                        System.out.println("response:" + response);
+                    int start = 0;
+                    int count = 0;
+
+                    while(response.length() > 39){
+                            String token = response.substring(start,start+40);
+                        synchronized (node.hashes) {
+                            if (!node.hashes.contains(token)) {
+                                System.out.println("Bad! Unexpected hash received from Server.");
+                                System.out.println("     hash: " + token);
+                                ct.badHashes.incrementAndGet();
+                            } else {
+                                count++;
+                            }
+                        }
+                        try {
+                            response = response.substring(41, response.length());
+                        } catch (java.lang.StringIndexOutOfBoundsException e){
+                            break;
+                        }
+                    }
+                    for(int i = 0; i < count; i++) {
+                        ct.received.incrementAndGet();
+                    }
+
                 }
-                String response = new String(buffer.array()).trim();
-                ct.received.incrementAndGet();
-//                System.out.println("Server responded with: " + response);
-//                System.out.println("");
-                buffer.clear();
             }
         };
         receiverThread.start();
-
-//        while(true) {
-//
-//            sleep(1000/messageRate);
-//            node.sendMessage();
-//            ct.sent.incrementAndGet();
-//
-//            String response = null;
-//            try {
-//                client.write(buffer);
-//                buffer.clear();
-//                buffer = ByteBuffer.allocate(256);
-//                client.read(buffer);
-//                response = new String(buffer.array()).trim();
-//
-////                System.out.println("Server responded with: " + response);
-////                System.out.println("");
-//                buffer.clear();
-//                buffer = ByteBuffer.allocate(8000);
-//            } catch (IOException e) {
-//                System.err.println("error receiving from cs455.scaling.server, stacktrace:...");
-//                e.printStackTrace();
-//                System.exit(1);
-//            }
-//            ct.received.incrementAndGet();
-//        }
-//    }
-//    private class Sender implements Runnable {
-//        int messageRate;
-//        Client caller;
-//        SocketChannel socketChannel;
-//
-//        Sender(int rate, Client node, SocketChannel socketChannel){
-//            this.caller = node;
-//            messageRate = rate;
-//            this.socketChannel = socketChannel;
-//        }
-//
-//        @Override
-//        public void run() {
-//
-//        }
-//    }
-//    private class Receiver implements Runnable {
-//
-//        @Override
-//        public void run() {
-//
-//        }
     }
 }

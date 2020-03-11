@@ -26,11 +26,13 @@ public class RandomPacket {
     public String hash(byte[] data) throws NoSuchAlgorithmException {
         MessageDigest digest = MessageDigest.getInstance("SHA1");
         byte[] hash  = digest.digest(data);
+//        System.out.println("hash.len: " + hash.length);
         BigInteger hashInt = new BigInteger(1, hash);
 
 //        pad with leading 0's so size == 40,
 //         it may have been stripped of leading 0's
         String hashString = hashInt.toString(16);
+//        System.out.println("computing:: hash string = " + hashString);
         while(hashString.length() < 40){
             hashString = "0" + hashString;
         }

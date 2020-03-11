@@ -13,11 +13,13 @@ public class ClientTracker implements Runnable {
     public AtomicLong sent;
     public AtomicLong received;
     private int timeout;
+    public AtomicLong badHashes;
 
     public ClientTracker(int timeout){
         this.sent = new AtomicLong(0);
         this.received = new AtomicLong(0);
         this.timeout = timeout;
+        this.badHashes = new AtomicLong(0);
     }
 
     private void printStats(){
@@ -25,6 +27,11 @@ public class ClientTracker implements Runnable {
         System.out.println("--------Timestamp: "+ t);
         System.out.println("    Messages Sent: " + sent.get());
         System.out.println("Messages Received: " + received.get());
+
+
+        if(badHashes.get() > 0){
+            System.out.println("       Bad Hashes: " + badHashes.get());
+        }
 
 
     }
