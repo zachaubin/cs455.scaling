@@ -2,22 +2,18 @@ package cs455.scaling.server;
 
 
 import cs455.scaling.bytes.RandomPacket;
-import cs455.scaling.pool.PrintBot;
 import cs455.scaling.pool.ThreadPool;
 import cs455.scaling.stats.Tracker;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Iterator;
-import java.util.Random;
 import java.util.Set;
 
 import static java.lang.Thread.sleep;
@@ -40,7 +36,6 @@ public class Server {
         client.register(selector, SelectionKey.OP_READ);
 //        System.out.println("\t\tNew cs455.scaling.client registered.");
     }
-
 
     public static void readAndRespond(SelectionKey key, Tracker tracker) throws IOException, NoSuchAlgorithmException {
         //create buffer to write into
@@ -101,9 +96,10 @@ public class Server {
         //register our channel to the selector
         serverSocket.register(selector, SelectionKey.OP_ACCEPT);
 
-        ThreadPool threadPool = new ThreadPool(poolSize,batchSize,batchTime);
+        //thread pool and tracker thread
+        Tracker tracker = new Tracker(20);
+        ThreadPool threadPool = new ThreadPool(poolSize,batchSize,batchTime,tracker);
         threadPool.poolOn();
-        Tracker tracker = new Tracker(5);
         Thread trackerThread = new Thread(tracker);
         trackerThread.start();
 
@@ -121,10 +117,9 @@ public class Server {
                 //grab current key
                 SelectionKey key = iter.next();
 
-                //Optional
                 if(key.isValid() == false){
                     iter.remove();
-                    System.out.println("not valid key?");
+//                    System.out.println("not valid key?");
                     continue;
                 }
                 if(key.isAcceptable()){

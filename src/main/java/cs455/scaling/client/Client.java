@@ -3,17 +3,13 @@ package cs455.scaling.client;
 import cs455.scaling.bytes.RandomPacket;
 import cs455.scaling.stats.ClientTracker;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Set;
+import java.util.LinkedList;
 
 import static java.lang.Thread.sleep;
 
@@ -32,21 +28,13 @@ public class Client {
     private static ByteBuffer buffer;
     private byte[] msg;
     private ArrayList<String> hashedMessages;//to verify with server's response
-    private volatile ArrayList<String> hashes;
+    private volatile LinkedList<String> hashes;
     RandomPacket randomPacket;
 
 
     public Client(){
-        this.hashes = new ArrayList<>();
+        this.hashes = new LinkedList<>();
         this.randomPacket = new RandomPacket();
-    }
-
-    public static byte[] getSliceOfArray(byte[] arr, int start, int end) {
-        byte[] slice = new byte[end - start];
-        for (int i = 0; i < slice.length; i++) {
-            slice[i] = arr[start + i];
-        }
-        return slice;
     }
 
     public static void main(String[] args) throws IOException, NoSuchAlgorithmException, InterruptedException {
@@ -77,7 +65,7 @@ public class Client {
 
 //        buffer = ByteBuffer.wrap("Please send this back to me.".getBytes());
         Client node = new Client();
-        ClientTracker ct = new ClientTracker(5);
+        ClientTracker ct = new ClientTracker(20);
         Thread ctThread = new Thread(ct);
         ctThread.start();
 
@@ -144,23 +132,7 @@ public class Client {
                         e.printStackTrace();
                         System.exit(1);
                     }
-//                    byte[] allBytes = receiverBuffer.array();
-//                    receiverBuffer.rewind();
-//                    System.out.println("\n\n\n allBytes.len = " + allBytes.length);
-//                    byte[] dst = new byte[40];
-//                    while(check >39) {
-//                        receiverBuffer.get(dst, 0, 40);
-//                        dst = getSliceOfArray(allBytes,start,check);
-//                        check -= 40;
-//                        start += 40;
-//                        System.out.println("dst="+dst);
-//                        BigInteger hashInt = new BigInteger(1, dst);
-
-                        //        pad with leading 0's so size == 40,
-                        //         it may have been stripped of leading 0's
-//                        String response = hashInt.toString(16);
-
-                        String response = new String(receiverBuffer.array()).trim();
+                    String response = new String(receiverBuffer.array()).trim();
 //                        System.out.println("response:" + response);
                     int start = 0;
                     int count = 0;
@@ -173,6 +145,7 @@ public class Client {
                                 System.out.println("     hash: " + token);
                                 ct.badHashes.incrementAndGet();
                             } else {
+                                node.hashes.remove(token);
                                 count++;
                             }
                         }

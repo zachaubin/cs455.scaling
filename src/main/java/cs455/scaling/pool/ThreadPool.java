@@ -32,22 +32,19 @@ public class ThreadPool {
 
     private Tracker tracker;
 
-    public ThreadPool(int maxNumberActiveThreads, int batchSize,int batchTime) {
+    public ThreadPool(int maxNumberActiveThreads, int batchSize,int batchTime,Tracker tracker) {
         this.maxNumberActiveThreads = maxNumberActiveThreads;
         queue = new LinkedBlockingQueue();
         //each swimmer is a thread that will process a cumber_batch
         swimmers = new Swimmer[maxNumberActiveThreads];
-
+        //container for linked blocking queue
         keys = new ArrayList<>();
-
-
-        tracker = new Tracker(0);
+        this.tracker = tracker;
         //start thread containers
         pool = new Thread[maxNumberActiveThreads];
         for (int i = 0; i < maxNumberActiveThreads; i++) {
             swimmers[i] = new Swimmer(i,keys,tracker);
             pool[i] = new Thread(swimmers[i]);
-
 //            swimmers[i].start();// potential bad?
         }
         this.batchSize = batchSize;
@@ -56,9 +53,6 @@ public class ThreadPool {
             c = null;
         }
         this.batchTime = batchTime;
-
-
-
     }
 
     public void poolOn(){
@@ -66,33 +60,12 @@ public class ThreadPool {
             t.start();
         }
     }
-    public ThreadPool(int maxNumberActiveThreads, int batchSize, Server server) {
-        this.maxNumberActiveThreads = maxNumberActiveThreads;
-        queue = new LinkedBlockingQueue();
-        //each swimmer is a thread that will process a cumber_batch
-        swimmers = new Swimmer[maxNumberActiveThreads];
-
-        //start thread containers
-        for (int i = 0; i < maxNumberActiveThreads; i++) {
-            swimmers[i] = new Swimmer(i, keys,tracker);
-//            swimmers[i].start();// potential bad?
-        }
-        this.batchSize = batchSize;
-        cumber_batch = new Runnable[batchSize];
-        for(Runnable c : cumber_batch){
-            c = null;
-        }
-        pool = new Thread[maxNumberActiveThreads];
-        this.server = server;
-    }
 
     public void execute(SelectionKey key) {
         synchronized (keys){
             key.attach(1);
             keys.add(key);
 //            System.out.println("xx keys.size()="+keys.size());
-
-
 //            System.out.println("key added:"+key);
 //            System.out.println("keys.size() = "+keys.size());
             if(keys.size() == batchSize){
@@ -103,7 +76,6 @@ public class ThreadPool {
                 for(SelectionKey k : keys){
                     batch.add(k);
                 }
-
                     queue.offer(batch);
 //                    queue.notify();
 //                    System.out.println("queue updated");
@@ -116,22 +88,10 @@ public class ThreadPool {
 //        System.out.println("end of key add");
     }
 
-//
-//    public Thread next() throws InterruptedException {
-//        for(Thread t : swimmers){
-//            if(t.getState() != Thread.State.RUNNABLE){
-//                return t;
-//            }
-//        }
-////        swimmers[0].wait();
-//        return next();
-//    }
-
     public String hash(byte[] data) throws NoSuchAlgorithmException {
         MessageDigest digest = MessageDigest.getInstance("SHA1");
         byte[] hash  = digest.digest(data);
         BigInteger hashInt = new BigInteger(1, hash);
-
 //        pad with leading 0's so size == 40,
 //         it may have been stripped of leading 0's
         String hashString = hashInt.toString(16);
@@ -140,7 +100,6 @@ public class ThreadPool {
         }
         return hashString;
     }
-
 
     //processes a *full* batch of cumber_tasks_t
     private class Swimmer implements Runnable {
@@ -166,7 +125,6 @@ public class ThreadPool {
                 e.printStackTrace();
             }
 //            System.out.println(">>>>swimmer started");
-
             while (true) {
 //                synchronized (queue) {
                     try {
@@ -186,7 +144,6 @@ public class ThreadPool {
                                 keys.clear();
                             }
                         }
-
 //                        System.out.println("::pool:ThreadPool:Swimmer[" + id + "]:took keys");
 //                        System.out.println("keys.size()="+batch.size());
 //                        if(batch == null) continue;
@@ -211,10 +168,5 @@ public class ThreadPool {
 
                 }
             }
-
-
-
         }
-
-
 }

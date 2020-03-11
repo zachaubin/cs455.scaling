@@ -16,7 +16,7 @@ public class Tracker implements Runnable {
      */
 
     public AtomicLong msgs;
-    public AtomicLong connections;
+    public volatile AtomicLong connections;
     public AtomicLong meanThroughput;
     private ArrayList<Long> throughputs;
     public AtomicLong iterations;
